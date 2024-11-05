@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import LoadingBox from '../components/LoadingBox'
 import MessageBox from '../components/MessageBox'
 import { useGetOrderHistoryQuery } from '../hooks/orderHooks'
-import React from 'react'
 import { ApiError } from '../types/ApiError'
 import { getError } from '../utils'
 

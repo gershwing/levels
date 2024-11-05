@@ -9,17 +9,17 @@ import { keyRouter } from './routers/keyRouter'
 import express, { Request, Response } from 'express'
 import path from 'path'
 
-dotenv.config()
+dotenv.config({ path: path.resolve(__dirname, '../.env') }) // Asegúrate de que esto esté al principio
 const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://localhost/tsmernamazonadb'
+  process.env.MONGODB_URI || 'mongodb://localhost/levelsshopdb'
 mongoose.set('strictQuery', true)
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
     console.log('connected to mongodb')
   })
-  .catch(() => {
-    console.log('error mongodb')
+  .catch((error) => {
+    console.log('error mongodb:', error)
   })
 
 const app = express()

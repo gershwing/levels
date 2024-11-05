@@ -10,6 +10,7 @@ import { useContext } from 'react'
 import { toast } from 'react-toastify'
 import { Store } from '../Store'
 import { convertProductToCartItem, getError } from '../utils'
+
 export default function ProductPage() {
   const params = useParams()
   const { slug } = params
@@ -21,6 +22,7 @@ export default function ProductPage() {
   const { state, dispatch } = useContext(Store)
   const { cart } = state
   const navigate = useNavigate()
+
   const addToCartHandler = () => {
     const existItem = cart.cartItems.find((x) => x._id === product!._id)
     const quantity = existItem ? existItem.quantity + 1 : 1
@@ -35,10 +37,13 @@ export default function ProductPage() {
     toast.success('Product added to the cart')
     navigate('/cart')
   }
+
   return isLoading ? (
     <LoadingBox />
   ) : error ? (
-    <MessageBox variant="danger">{getError(error as ApiError)}</MessageBox>
+    <MessageBox variant="danger">
+      {getError(error as unknown as ApiError)}
+    </MessageBox>
   ) : !product ? (
     <MessageBox variant="danger">Product Not Found</MessageBox>
   ) : (

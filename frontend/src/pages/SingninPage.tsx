@@ -9,6 +9,7 @@ import { Store } from '../Store'
 import { ApiError } from '../types/ApiError'
 import { getError } from '../utils'
 import React from 'react'
+
 export default function SigninPage() {
   const navigate = useNavigate()
   const { search } = useLocation()
@@ -16,11 +17,14 @@ export default function SigninPage() {
   const redirect = redirectInUrl ? redirectInUrl : '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false) // Estado local para gestionar la carga
   const { state, dispatch } = useContext(Store)
   const { userInfo } = state
-  const { mutateAsync: signin, isLoading } = useSigninMutation()
+  const { mutateAsync: signin } = useSigninMutation()
+
   const submitHandler = async (e: React.SyntheticEvent) => {
     e.preventDefault()
+    setIsLoading(true) // Activar el estado de carga
     try {
       const data = await signin({
         email,
@@ -31,13 +35,17 @@ export default function SigninPage() {
       navigate(redirect)
     } catch (err) {
       toast.error(getError(err as ApiError))
+    } finally {
+      setIsLoading(false) // Desactivar el estado de carga
     }
   }
+
   useEffect(() => {
     if (userInfo) {
       navigate(redirect)
     }
   }, [navigate, redirect, userInfo])
+
   return (
     <Container className="small-container">
       <Helmet>
@@ -63,7 +71,7 @@ export default function SigninPage() {
         </Form.Group>
         <div className="mb-3">
           <Button disabled={isLoading} type="submit">
-            Sign In
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
           {isLoading && <LoadingBox />}
         </div>

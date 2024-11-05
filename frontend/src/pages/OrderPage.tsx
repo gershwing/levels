@@ -1,10 +1,11 @@
 import {
   PayPalButtons,
   PayPalButtonsComponentProps,
-  SCRIPT_LOADING_STATE,
   usePayPalScriptReducer,
+  SCRIPT_LOADING_STATE,
+  DISPATCH_ACTION,
 } from '@paypal/react-paypal-js'
-import { useContext, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Card, Col, ListGroup, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet-async'
 import { Link, useParams } from 'react-router-dom'
@@ -16,65 +17,75 @@ import {
   useGetPaypalClientIdQuery,
   usePayOrderMutation,
 } from '../hooks/orderHooks'
-import { Store } from '../Store'
 import { ApiError } from '../types/ApiError'
 import { getError } from '../utils'
-import React from 'react'
+
 export default function OrderPage() {
-  const { state } = useContext(Store)
-  const { userInfo } = state
   const params = useParams()
   const { id: orderId } = params
+  const [isPaying, setIsPaying] = useState(false)
+
   const {
     data: order,
     isLoading,
     error,
     refetch,
   } = useGetOrderDetailsQuery(orderId!)
-  const { mutateAsync: payOrder, isLoading: loadingPay } = usePayOrderMutation()
+  const { mutateAsync: payOrder } = usePayOrderMutation()
+
   const testPayHandler = async () => {
-    await payOrder({ orderId: orderId! })
-    refetch()
-    toast.success('Order is paid')
+    setIsPaying(true)
+    try {
+      await payOrder({ orderId: orderId! })
+      refetch()
+      toast.success('Order is paid')
+    } catch (err) {
+      toast.error(getError(err as ApiError))
+    } finally {
+      setIsPaying(false)
+    }
   }
+
   const [{ isPending, isRejected }, paypalDispatch] = usePayPalScriptReducer()
   const { data: paypalConfig } = useGetPaypalClientIdQuery()
+
   useEffect(() => {
     if (paypalConfig && paypalConfig.clientId) {
       const loadPaypalScript = async () => {
         paypalDispatch({
-          type: 'resetOptions',
+          type: DISPATCH_ACTION.RESET_OPTIONS, // Uso de DISPATCH_ACTION.RESET_OPTIONS
           value: {
-            'client-id': paypalConfig!.clientId,
+            clientId: paypalConfig.clientId,
             currency: 'USD',
           },
         })
         paypalDispatch({
-          type: 'setLoadingStatus',
-          value: SCRIPT_LOADING_STATE.PENDING,
+          type: DISPATCH_ACTION.LOADING_STATUS, // Uso de DISPATCH_ACTION.LOADING_STATUS
+          value: SCRIPT_LOADING_STATE.PENDING, // Uso de SCRIPT_LOADING_STATE.PENDING
         })
       }
       loadPaypalScript()
     }
-  }, [paypalConfig])
+  }, [paypalConfig, paypalDispatch])
+
   const paypalbuttonTransactionProps: PayPalButtonsComponentProps = {
     style: { layout: 'vertical' },
-    createOrder(data, actions) {
+    createOrder(_, actions) {
       return actions.order
         .create({
+          intent: 'CAPTURE',
           purchase_units: [
             {
               amount: {
+                currency_code: 'USD',
                 value: order!.totalPrice.toString(),
               },
             },
           ],
         })
-        .then((orderID: string) => {
-          return orderID
-        })
+        .then((orderID: string) => orderID)
     },
-    onApprove(data, actions) {
+    onApprove(_, actions) {
       return actions.order!.capture().then(async (details) => {
         try {
           await payOrder({ orderId: orderId!, ...details })
@@ -89,6 +100,7 @@ export default function OrderPage() {
       toast.error(getError(err as ApiError))
     },
   }
+
   return isLoading ? (
     <LoadingBox></LoadingBox>
   ) : error ? (
@@ -190,7 +202,7 @@ export default function OrderPage() {
                 <ListGroup.Item>
                   <Row>
                     <Col>
-                      <strong> Order Total</strong>
+                      <strong>Order Total</strong>
                     </Col>
                     <Col>
                       <strong>${order.totalPrice.toFixed(2)}</strong>
@@ -213,7 +225,7 @@ export default function OrderPage() {
                         <Button onClick={testPayHandler}>Test Pay</Button>
                       </div>
                     )}
-                    {loadingPay && <LoadingBox></LoadingBox>}
+                    {isPaying && <LoadingBox></LoadingBox>}
                   </ListGroup.Item>
                 )}
               </ListGroup>

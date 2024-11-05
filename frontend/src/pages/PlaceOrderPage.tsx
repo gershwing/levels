@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Button, Card, Col, ListGroup, Row } from 'react-bootstrap'
 import { Helmet } from 'react-helmet-async'
 import { Link, useNavigate } from 'react-router-dom'
@@ -9,20 +9,29 @@ import { useCreateOrderMutation } from '../hooks/orderHooks'
 import { Store } from '../Store'
 import { ApiError } from '../types/ApiError'
 import { getError } from '../utils'
-import React from 'react'
+
 export default function PlaceOrderPage() {
   const navigate = useNavigate()
   const { state, dispatch } = useContext(Store)
-  const { cart, userInfo } = state
-  const round2 = (num: number) => Math.round(num * 100 + Number.EPSILON) / 100 // 123.2345 => 123.23
+  const { cart } = state // Eliminado `userInfo` ya que no se utiliza
+
+  // Redondear a dos decimales
+  const round2 = (num: number) => Math.round(num * 100 + Number.EPSILON) / 100
+
+  // Cálculo de precios
   cart.itemsPrice = round2(
     cart.cartItems.reduce((a, c) => a + c.quantity * c.price, 0)
   )
   cart.shippingPrice = cart.itemsPrice > 100 ? round2(0) : round2(10)
   cart.taxPrice = round2(0.15 * cart.itemsPrice)
   cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice
-  const { mutateAsync: createOrder, isLoading } = useCreateOrderMutation()
+
+  const [isLoading, setIsLoading] = useState(false) // Estado de carga local
+
+  const { mutateAsync: createOrder } = useCreateOrderMutation() // Eliminado `isLoading`
+
   const placeOrderHandler = async () => {
+    setIsLoading(true)
     try {
       const data = await createOrder({
         orderItems: cart.cartItems,
@@ -38,13 +47,17 @@ export default function PlaceOrderPage() {
       navigate(`/order/${data.order._id}`)
     } catch (err) {
       toast.error(getError(err as ApiError))
+    } finally {
+      setIsLoading(false)
     }
   }
+
   useEffect(() => {
     if (!cart.paymentMethod) {
       navigate('/payment')
     }
   }, [cart, navigate])
+
   return (
     <div>
       <CheckoutSteps step1 step2 step3 step4></CheckoutSteps>
@@ -128,7 +141,7 @@ export default function PlaceOrderPage() {
                 <ListGroup.Item>
                   <Row>
                     <Col>
-                      <strong> Order Total</strong>
+                      <strong>Order Total</strong>
                     </Col>
                     <Col>
                       <strong>${cart.totalPrice.toFixed(2)}</strong>

@@ -6,7 +6,7 @@ import { CartItem } from '../types/Cart'
 import { useContext } from 'react'
 import { Store } from '../Store'
 import { convertProductToCartItem } from '../utils'
-import React from 'react'
+
 function ProductItem({ product }: { product: Product }) {
   const { state, dispatch } = useContext(Store)
   const {

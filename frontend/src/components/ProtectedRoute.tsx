@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { Store } from '../Store'
-import React from 'react'
+
 export default function ProtectedRoute() {
   const {
     state: { userInfo },

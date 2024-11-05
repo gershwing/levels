@@ -6,7 +6,6 @@ import { toast } from 'react-toastify'
 import MessageBox from '../components/MessageBox'
 import { Store } from '../Store'
 import { CartItem } from '../types/Cart'
-import React from 'react'
 export default function CartPage() {
   const navigate = useNavigate()
   const {

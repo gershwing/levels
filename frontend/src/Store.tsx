@@ -1,6 +1,7 @@
 import React from 'react'
 import { Cart, CartItem, ShippingAddress } from './types/Cart'
-import { UserInfo } from './types/Userinfo'
+import { UserInfo } from './types/UserInfo' // Cambio aplicado a 'UserInfo' en mayúscula
+
 type AppState = {
   mode: string
   cart: Cart
@@ -33,6 +34,7 @@ const initialState: AppState = {
     totalPrice: 0,
   },
 }
+
 type Action =
   | { type: 'SWITCH_MODE' }
   | { type: 'CART_ADD_ITEM'; payload: CartItem }
@@ -113,11 +115,13 @@ function reducer(state: AppState, action: Action): AppState {
       return state
   }
 }
+
 const defaultDispatch: React.Dispatch<Action> = () => initialState
 const Store = React.createContext({
   state: initialState,
   dispatch: defaultDispatch,
 })
+
 function StoreProvider(props: React.PropsWithChildren<{}>) {
   const [state, dispatch] = React.useReducer<React.Reducer<AppState, Action>>(
     reducer,
@@ -125,4 +129,5 @@ function StoreProvider(props: React.PropsWithChildren<{}>) {
   )
   return <Store.Provider value={{ state, dispatch }} {...props} />
 }
+
 export { Store, StoreProvider }

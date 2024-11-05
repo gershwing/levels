@@ -6,7 +6,6 @@ import MessageBox from '../components/MessageBox'
 import ProductItem from '../components/ProductItem'
 import { useGetProductsQuery } from '../hooks/productHooks'
 import { Helmet } from 'react-helmet-async'
-import React from 'react'
 
 export default function HomePage() {
   const { data: products, isLoading, error } = useGetProductsQuery()

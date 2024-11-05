@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import apiClient from '../apiClient'
-import { UserInfo } from '../types/Userinfo'
+import { UserInfo } from '../types/UserInfo'
 export const useSigninMutation = () =>
   useMutation({
     mutationFn: async ({
