@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TypeScript MERN AMAZONA
 
 ## Lessons
@@ -58,3 +59,7 @@
 27. Create-Order-Page
 28. Pay-Order-By-PayPal
 29. Create-Order-History-Page
+=======
+# levels
+tienda en linea TS
+>>>>>>> d51a1bd26c4996a59e5abfaecd7584fdb02f06af
